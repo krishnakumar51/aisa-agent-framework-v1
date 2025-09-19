@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - PLAYWRIGHT_HEADLESS=true
+      - APPIUM_HOST=http://appium:4723
+    volumes:
+      - ./app:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    depends_on:
+      - appium
+    networks:
+      - automation-network
+
+  appium:
+    image: appium/appium:2.0.0
+    ports:
+      - "4723:4723"
+    environment:
+      - RELAXED_SECURITY=true
+      - LOG_LEVEL=info
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+    privileged: true
+    networks:
+      - automation-network
+
+  # Optional: Add Android emulator service
+  android-emulator:
+    image: budtmo/docker-android:emulator_11.0
+    privileged: true
+    ports:
+      - "6080:6080"  # VNC
+      - "5554:5554"  # ADB
+      - "5555:5555"  # ADB
+    environment:
+      - EMULATOR_DEVICE=Samsung Galaxy S10
+      - WEB_VNC=true
+      - APPIUM=true
+    networks:
+      - automation-network
+
+networks:
+  automation-network:
+    driver: bridge
