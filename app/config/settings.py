@@ -1,74 +1,67 @@
 """
-Configuration settings for the automation framework
+Settings Configuration for Claude 4 Sonnet Automation System
+Simple configuration management
 """
 import os
-from typing import Dict, Any
-from dotenv import load_dotenv
+from typing import Optional
+from pydantic_settings import BaseSettings
 
-load_dotenv()
-
-class Settings:
-    """Application settings"""
+class Settings(BaseSettings):
+    """Application settings with Claude 4 Sonnet configuration"""
     
     # API Configuration
-    API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
-    API_PORT: int = int(os.getenv("API_PORT", "8000"))
-    API_TITLE: str = "Document Automation Framework"
-    API_VERSION: str = "1.0.0"
+    api_title: str = "Generic Multi-Agent Automation System"
+    api_version: str = "1.1.0"
+    api_host: str = "0.0.0.0"
+    api_port: int = 8000
+    debug_mode: bool = False
+    enable_cors: bool = True
     
-    # Model Configuration
-    DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "claude-sonnet")
+    # Model Configuration - Updated for Claude 4 Sonnet
+    default_model: str = "claude-sonnet-4-20250514"  # Claude 4 Sonnet production ID
+    max_retries: int = 3
+    workflow_timeout: int = 600  # 10 minutes
     
-    # API Keys
-    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    # Directory Configuration
+    generated_root: str = "generated_code"
+    logs_directory: str = "logs"
     
-    # Model Configurations
-    MODELS: Dict[str, Dict[str, Any]] = {
-        "claude-sonnet": {
-            "model_name": "claude-3-5-sonnet-20241022",
-            "api_key": ANTHROPIC_API_KEY,
-            "max_tokens": 4096,
-            "temperature": 0.3
-        },
-        "openai-gpt4": {
-            "model_name": "gpt-4-1106-preview",
-            "api_key": OPENAI_API_KEY,
-            "max_tokens": 4096,
-            "temperature": 0.3
-        },
-        "gemini-flash": {
-            "model_name": "gemini-2.5-flash",
-            "api_key": GOOGLE_API_KEY,
-            "max_tokens": 4096,
-            "temperature": 0.3
+    # Security Configuration
+    anthropic_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = None
+    
+    # Performance Configuration
+    enable_screenshots: bool = True
+    log_level: str = "INFO"
+    max_concurrent_tasks: int = 5
+    
+    # Feature Flags
+    enable_websockets: bool = True
+    enable_file_downloads: bool = True
+    enable_task_persistence: bool = True
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = False
+        extra = "allow" 
+        # Override environment variable names
+        fields = {
+            "anthropic_api_key": {"env": "ANTHROPIC_API_KEY"},
+            "openai_api_key": {"env": "OPENAI_API_KEY"}
         }
-    }
-    
-    # Driver Configuration
-    PLAYWRIGHT_HEADLESS: bool = os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
-    PLAYWRIGHT_STEALTH: bool = os.getenv("PLAYWRIGHT_STEALTH", "true").lower() == "true"
-    APPIUM_HOST: str = os.getenv("APPIUM_HOST", "http://localhost:4723")
-    
-    # File Upload Configuration
-    MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", "50")) * 1024 * 1024  # 50MB
-    ALLOWED_FILE_TYPES: list = [".pdf", ".png", ".jpg", ".jpeg"]
-    
-    # OCR Configuration
-    TESSERACT_CMD: str = os.getenv("TESSERACT_CMD", "/usr/bin/tesseract")
-    
-    # Workflow Configuration
-    WORKFLOW_TIMEOUT: int = int(os.getenv("WORKFLOW_TIMEOUT", "600"))  # 10 minutes
-    RETRY_ATTEMPTS: int = int(os.getenv("RETRY_ATTEMPTS", "3"))
-    
-    # Artifacts Configuration
-    GENERATED_ROOT: str = os.getenv("GENERATED_ROOT", "generated_code")
-    
-    @classmethod
-    def get_model_config(cls, model_name: str) -> Dict[str, Any]:
-        """Get configuration for a specific model"""
-        return cls.MODELS.get(model_name, cls.MODELS[cls.DEFAULT_MODEL])
 
 # Global settings instance
-settings = Settings()
+_settings: Optional[Settings] = None
+
+def get_settings() -> Settings:
+    """Get application settings (singleton pattern)"""
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+        
+        # Validate critical settings
+        if not _settings.anthropic_api_key and not os.getenv("ANTHROPIC_API_KEY"):
+            print("⚠️ WARNING: ANTHROPIC_API_KEY not set. Claude 4 Sonnet will use fallback responses.")
+            print("   Set your API key: export ANTHROPIC_API_KEY=sk-ant-xxxxx")
+    
+    return _settings
