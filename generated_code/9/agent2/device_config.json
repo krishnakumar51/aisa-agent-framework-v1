@@ -1,0 +1,18 @@
+{
+  "device_detection": {
+    "enabled": true,
+    "prefer_real_devices": true,
+    "fallback_to_emulator": true
+  },
+  "appium_settings": {
+    "server_url": "http://localhost:4723",
+    "new_command_timeout": 300,
+    "implicit_wait": 10
+  },
+  "automation_settings": {
+    "screenshot_on_failure": true,
+    "ocr_enabled": true,
+    "retry_attempts": 3,
+    "step_delay": 1
+  }
+}

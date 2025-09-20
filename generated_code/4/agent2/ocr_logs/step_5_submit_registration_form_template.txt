@@ -1,9 +1,0 @@
-OCR Log Template - Step 5
-Step Name: Submit registration form
-Action Type: click
-Expected Result: Account created successfully
-
-This file will be populated with actual OCR results during testing.
-
-Template created by Agent 2 at: 2025-09-20T10:35:44.843465
-Task ID: 4

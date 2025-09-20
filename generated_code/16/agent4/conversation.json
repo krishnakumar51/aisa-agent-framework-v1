@@ -1,0 +1,24 @@
+{
+  "seq_id": 16,
+  "agent": "agent4",
+  "total_communications": 1,
+  "generated_at": "2025-09-20T16:54:47.115475",
+  "conversation_summary": {
+    "agent2_to_agent3": 0,
+    "agent3_to_agent2": 1,
+    "resolved_issues": 0,
+    "pending_issues": 1
+  },
+  "detailed_conversations": [
+    {
+      "communication_id": 1,
+      "from_agent": "agent3",
+      "to_agent": "agent2",
+      "message_type": "feedback",
+      "timestamp": "2025-09-20 16:54:46",
+      "status": "pending",
+      "message_preview": "{\"feedback_summary\": \"Generated 1 feedback items\", \"key_recommendations\": [\"Poor performance. Significant improvements needed in automation approach.\"]}",
+      "response_preview": null
+    }
+  ]
+}

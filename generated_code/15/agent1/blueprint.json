@@ -1,0 +1,80 @@
+{
+  "seq_id": 15,
+  "instruction": "Create an Outlook account with name Krishna Kumar and DOB 20 Sep 2000",
+  "task_category": "account_creation",
+  "platform": "mobile",
+  "document_analysis": {
+    "text_length": 3434,
+    "ui_elements_found": 0,
+    "text_preview": "Step-by-Step\n \nProcess\n \n(Outlook\n \nMobile\n \nApp)\n \n \n1.\n \nInitial\n \nScreen\n \n–\n \nAdd\n \nEmail\n \nAccounts\n \n●\n \nScreen\n \ndisplays:\n \n“Agregar\n \ntus\n \ncuentas\n \nde\n \ncorreo”\n \n(Add\n \nyour\n \nemail\n \nacco..."
+  },
+  "ui_elements": [],
+  "steps": [
+    {
+      "step_order": 1,
+      "step_name": "Initialize automation environment",
+      "action_type": "setup",
+      "description": "Setup mobile automation environment",
+      "expected_result": "Environment ready for automation",
+      "validation_method": "system_check"
+    },
+    {
+      "step_order": 2,
+      "step_name": "Navigate to registration page",
+      "action_type": "navigate",
+      "description": "Open registration or signup page",
+      "expected_result": "Registration page loaded",
+      "validation_method": "page_title_check"
+    },
+    {
+      "step_order": 3,
+      "step_name": "Enter user name",
+      "action_type": "input",
+      "description": "Fill in user name or full name field",
+      "expected_result": "Name entered successfully",
+      "validation_method": "field_value_check"
+    },
+    {
+      "step_order": 4,
+      "step_name": "Enter date of birth",
+      "action_type": "input",
+      "description": "Fill in date of birth field",
+      "expected_result": "DOB entered successfully",
+      "validation_method": "field_value_check"
+    },
+    {
+      "step_order": 5,
+      "step_name": "Submit registration form",
+      "action_type": "click",
+      "description": "Click submit or create account button",
+      "expected_result": "Account created successfully",
+      "validation_method": "success_message_check"
+    },
+    {
+      "step_order": 6,
+      "step_name": "Validate account creation",
+      "action_type": "validate",
+      "description": "Verify account was created successfully",
+      "expected_result": "Account creation confirmed",
+      "validation_method": "ocr_validation"
+    }
+  ],
+  "estimated_duration": 90,
+  "complexity": "medium",
+  "requirements": [
+    "selenium>=4.0.0",
+    "requests>=2.25.0",
+    "Pillow>=8.0.0",
+    "pytesseract>=0.3.8",
+    "Appium-Python-Client>=2.0.0",
+    "opencv-python>=4.5.0",
+    "faker>=8.0.0"
+  ],
+  "generated_at": "2025-09-20T16:26:28.133651",
+  "agent": "agent1",
+  "folder_structure": {
+    "agent2_folder": "generated_code/15/agent2",
+    "agent3_testing": "generated_code/15/agent3",
+    "agent4_folder": "generated_code/15/agent4"
+  }
+}

@@ -1,3 +1,18 @@
 $env:PYTHONIOENCODING="utf-8"
 
 api for antrohpi
+
+
+uvicorn app.updated_main:app --reload --reload-dir app
+
+Go to: https://github.com/UB-Mannheim/tesseract/wiki
+
+Download Windows installer
+
+Install to default location (C:\Program Files\Tesseract-OCR\)
+
+set TESSERACT_PATH="C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+
+
+Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force

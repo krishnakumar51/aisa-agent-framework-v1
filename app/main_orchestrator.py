@@ -14,8 +14,8 @@ from typing import Dict, List, Any, Optional
 # Import all updated agents
 from app.database.database_manager import get_testing_db
 from app.agents.agent1_blueprint import UpdatedAgent1_BlueprintGenerator
-from app.agents.agent2_code import UpdatedAgent2_CodeGenerator
-from app.agents.agent3_testing import UpdatedAgent3_TestingEnvironment
+from app.agents.enhanced_agent2 import EnhancedAgent2_CodeGenerator
+from app.agents.enhanced_agent3 import EnhancedAgent3_IsolatedTesting
 from app.agents.agent4_results import UpdatedAgent4_FinalReporter
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class UpdatedMultiAgentOrchestrator:
         
         # Initialize all agents
         self.agent1 = UpdatedAgent1_BlueprintGenerator()
-        self.agent2 = UpdatedAgent2_CodeGenerator()
-        self.agent3 = UpdatedAgent3_TestingEnvironment()
+        self.agent2 = EnhancedAgent2_CodeGenerator()
+        self.agent3 = EnhancedAgent3_IsolatedTesting()
         self.agent4 = UpdatedAgent4_FinalReporter()
         
         self.initialized = False

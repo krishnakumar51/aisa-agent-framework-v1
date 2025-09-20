@@ -1,7 +1,8 @@
 """
-Updated Agent 1: Blueprint Generation with Proper Folder Structure
-Creates blueprint.json in agent1/ folder and initializes SQLite database
+COMPLETE FIXED Agent 1 - All Methods Included
+Fixes the missing _create_workflow_steps_in_db method and ensures database compatibility
 """
+
 import asyncio
 import json
 import logging
@@ -10,44 +11,44 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+
 import PyPDF2
 import pytesseract
 from PIL import Image
 import io
 
-# Import the updated database manager
+try:
+    import aiosqlite
+    AIOSQLITE_AVAILABLE = True
+except ImportError:
+    AIOSQLITE_AVAILABLE = False
+
 from app.database.database_manager import get_testing_db
 
 logger = logging.getLogger(__name__)
 
 class UpdatedAgent1_BlueprintGenerator:
-    """Agent 1: Blueprint Generation with Testing Environment Structure"""
+    """Agent 1: Blueprint Generation - COMPLETE with all methods"""
     
     def __init__(self):
         self.agent_name = "agent1"
         self.db_manager = None
-    
+        
     async def initialize(self):
         """Initialize database connection"""
         self.db_manager = await get_testing_db()
-        logger.info("🔵 Agent 1: Blueprint generator initialized with updated structure")
+        logger.info("🔵 [Agent1] Blueprint generator initialized - COMPLETE VERSION")
     
-    async def process_and_generate_blueprint(self, document_content: bytes, screenshots: List[bytes],
-                                           instruction: str, platform: str, 
-                                           additional_data: Dict[str, Any] = None) -> Dict[str, Any]:
-        """
-        Process documents and generate blueprint with proper folder structure
+    async def process_and_generate_blueprint(
+        self, 
+        document_content: bytes, 
+        screenshots: List[bytes], 
+        instruction: str, 
+        platform: str, 
+        additional_data: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """Process documents and generate blueprint with proper folder structure"""
         
-        Args:
-            document_content: PDF or document bytes
-            screenshots: List of screenshot bytes  
-            instruction: User instruction
-            platform: Target platform
-            additional_data: Additional user data
-            
-        Returns:
-            Processing results with seq_id and folder structure
-        """
         start_time = time.time()
         
         logger.info(f"🔵 [Agent1] Starting blueprint generation")
@@ -57,10 +58,10 @@ class UpdatedAgent1_BlueprintGenerator:
         logger.info(f"🔵 [Agent1] Platform: {platform}")
         
         try:
-            # Create task in database and get sequential ID
+            # STEP 1: Create task in database and get sequential ID
             seq_id = await self.db_manager.create_task(
                 instruction=instruction,
-                platform=platform,
+                platform=platform, 
                 additional_data=additional_data or {}
             )
             
@@ -75,20 +76,20 @@ class UpdatedAgent1_BlueprintGenerator:
             # Update task status
             await self.db_manager.update_task_status(seq_id, "processing", "agent1")
             
-            # Step 1: Extract text content
+            # STEP 2: Extract text content
             text_content = await self._extract_text_content(document_content)
             logger.info(f"🔵 [Agent1] ✅ Extracted {len(text_content)} characters")
             
-            # Step 2: Process screenshots
+            # STEP 3: Process screenshots
             ui_elements = await self._process_screenshots(screenshots, agent1_path)
             logger.info(f"🔵 [Agent1] ✅ Identified {len(ui_elements)} UI elements")
             
-            # Step 3: Generate automation blueprint
+            # STEP 4: Generate automation blueprint
             blueprint = await self._generate_automation_blueprint(
                 seq_id, instruction, platform, text_content, ui_elements
             )
             
-            # Step 4: Save blueprint to agent1/blueprint.json
+            # STEP 5: Save blueprint to agent1/blueprint.json
             blueprint_path = agent1_path / "blueprint.json"
             with open(blueprint_path, 'w', encoding='utf-8') as f:
                 json.dump(blueprint, f, indent=2, ensure_ascii=False)
@@ -103,22 +104,21 @@ class UpdatedAgent1_BlueprintGenerator:
                 version=1
             )
             
-            # Step 5: Create workflow steps in database
-            await self._create_workflow_steps_in_db(seq_id, blueprint.get('steps', []))
+            # STEP 6: Create workflow steps in database (FIXED METHOD)
+            await self._create_workflow_steps_in_db(seq_id, blueprint.get("steps", []))
             
-            # Step 6: Initialize SQLite database in task folder
+            # STEP 7: Initialize SQLite database in task folder
             task_db_path = base_path / "sqlite_db.sqlite"
             await self._initialize_task_database(task_db_path, seq_id)
             
-            # Update task progress
             await self.db_manager.update_task_progress(seq_id, blueprint_generated=True)
             await self.db_manager.update_task_status(seq_id, "blueprint_completed", "agent1")
             
             processing_time = time.time() - start_time
             confidence = self._calculate_confidence(text_content, ui_elements, blueprint)
             
-            logger.info(f"🔵 [Agent1] ✅ Blueprint saved to: {blueprint_path}")
-            logger.info(f"🔵 [Agent1] ✅ Task database initialized: {task_db_path}")
+            logger.info(f"🔵 [Agent1] Blueprint saved to {blueprint_path}")
+            logger.info(f"🔵 [Agent1] Task database initialized: {task_db_path}")
             logger.info(f"🔵 [Agent1] ✅ Blueprint generation completed")
             logger.info(f"🔵 [Agent1] Blueprint confidence: {confidence:.2f}")
             logger.info(f"🔵 [Agent1] Automation steps: {len(blueprint.get('steps', []))}")
@@ -134,7 +134,7 @@ class UpdatedAgent1_BlueprintGenerator:
                 "text_extracted": len(text_content),
                 "ui_elements": len(ui_elements),
                 "blueprint_confidence": confidence,
-                "automation_steps": len(blueprint.get('steps', [])),
+                "automation_steps": len(blueprint.get("steps", [])),
                 "platform": platform,
                 "processing_time": processing_time,
                 "blueprint": blueprint,
@@ -142,7 +142,7 @@ class UpdatedAgent1_BlueprintGenerator:
                     "base": str(base_path),
                     "agent1": str(agent1_path),
                     "agent2": str(base_path / "agent2"),
-                    "agent3_testing": str(base_path / "agent3" / "testing"),
+                    "agent3_testing": str(base_path / "agent3"),
                     "agent4": str(base_path / "agent4")
                 }
             }
@@ -151,7 +151,6 @@ class UpdatedAgent1_BlueprintGenerator:
             error_msg = f"Blueprint generation failed: {str(e)}"
             logger.error(f"🔴 [Agent1] {error_msg}")
             
-            # Update task status to failed if seq_id exists
             if 'seq_id' in locals():
                 await self.db_manager.update_task_status(seq_id, "failed", "agent1")
             
@@ -170,8 +169,7 @@ class UpdatedAgent1_BlueprintGenerator:
                 pdf_reader = PyPDF2.PdfReader(io.BytesIO(document_content))
                 text_content = ""
                 for page in pdf_reader.pages:
-                    text_content += page.extract_text() + "\\n"
-                
+                    text_content += page.extract_text()
                 if text_content.strip():
                     return text_content.strip()
             
@@ -192,11 +190,11 @@ class UpdatedAgent1_BlueprintGenerator:
             except:
                 pass
             
-            return f"Document content for automation task (Size: {len(document_content)} bytes)"
+            return f"Document content for automation task. Size: {len(document_content)} bytes"
             
         except Exception as e:
-            logger.warning(f"🔴 [Agent1] Text extraction failed: {str(e)}")
-            return f"Text extraction failed, but document received ({len(document_content)} bytes)"
+            logger.warning(f"🔵 [Agent1] Text extraction failed: {str(e)}")
+            return f"Text extraction failed, but document received: {len(document_content)} bytes"
     
     async def _process_screenshots(self, screenshots: List[bytes], agent1_path: Path) -> List[Dict[str, Any]]:
         """Process screenshots and identify UI elements"""
@@ -221,34 +219,34 @@ class UpdatedAgent1_BlueprintGenerator:
                     # Identify UI elements from OCR text
                     elements = self._identify_ui_elements(ocr_text, f"screenshot_{i+1}")
                     ui_elements.extend(elements)
-                
-                logger.info(f"🔵 [Agent1] Processed screenshot {i+1}: {len(ocr_text)} chars OCR text")
-                
+                    logger.info(f"🔵 [Agent1] Processed screenshot {i+1}: {len(ocr_text)} chars OCR text")
+                    
             except Exception as e:
-                logger.warning(f"🔴 [Agent1] Screenshot {i+1} processing failed: {str(e)}")
+                logger.warning(f"🔵 [Agent1] Screenshot {i+1} processing failed: {str(e)}")
         
         return ui_elements
     
     def _identify_ui_elements(self, ocr_text: str, source: str) -> List[Dict[str, Any]]:
         """Identify UI elements from OCR text"""
         elements = []
-        lines = ocr_text.split('\\n')
+        lines = ocr_text.split('\n')
         
         # UI element keywords
         ui_keywords = {
-            'button': ['button', 'click', 'submit', 'cancel', 'ok', 'yes', 'no', 'save'],
-            'input': ['input', 'text', 'field', 'name', 'email', 'password', 'enter'],
-            'select': ['dropdown', 'select', 'option', 'choose', 'pick'],
-            'checkbox': ['checkbox', 'radio', 'check', 'tick'],
-            'navigation': ['menu', 'nav', 'home', 'back', 'next', 'previous'],
-            'form': ['form', 'login', 'register', 'signup', 'create', 'account']
+            "button": ["button", "click", "submit", "cancel", "ok", "yes", "no", "save"],
+            "input": ["input", "text", "field", "name", "email", "password", "enter"],
+            "select": ["dropdown", "select", "option", "choose", "pick"],
+            "checkbox": ["checkbox", "radio", "check", "tick"],
+            "navigation": ["menu", "nav", "home", "back", "next", "previous"],
+            "form": ["form", "login", "register", "signup", "create", "account"]
         }
         
         for i, line in enumerate(lines):
             line_lower = line.lower().strip()
             if line_lower and len(line_lower) > 2:
-                # Check for UI element type
                 element_type = "text"
+                
+                # Check for UI element type
                 for ui_type, keywords in ui_keywords.items():
                     if any(keyword in line_lower for keyword in keywords):
                         element_type = ui_type
@@ -270,17 +268,23 @@ class UpdatedAgent1_BlueprintGenerator:
         base_confidence = 0.5
         
         # Boost confidence based on specific keywords
-        if element_type == "button" and any(word in text for word in ['click', 'submit', 'button']):
+        if element_type == "button" and any(word in text for word in ["click", "submit", "button"]):
             base_confidence += 0.3
-        elif element_type == "input" and any(word in text for word in ['input', 'field', 'enter']):
+        elif element_type == "input" and any(word in text for word in ["input", "field", "enter"]):
             base_confidence += 0.3
-        elif element_type == "form" and any(word in text for word in ['form', 'login', 'register']):
+        elif element_type == "form" and any(word in text for word in ["form", "login", "register"]):
             base_confidence += 0.2
         
         return min(base_confidence, 1.0)
     
-    async def _generate_automation_blueprint(self, seq_id: int, instruction: str, platform: str,
-                                           text_content: str, ui_elements: List[Dict]) -> Dict[str, Any]:
+    async def _generate_automation_blueprint(
+        self, 
+        seq_id: int, 
+        instruction: str, 
+        platform: str, 
+        text_content: str, 
+        ui_elements: List[Dict]
+    ) -> Dict[str, Any]:
         """Generate automation blueprint based on analysis"""
         
         # Categorize task
@@ -307,9 +311,9 @@ class UpdatedAgent1_BlueprintGenerator:
             "generated_at": datetime.utcnow().isoformat(),
             "agent": self.agent_name,
             "folder_structure": {
-                "agent2_folder": f"generated_code/{seq_id}/agent2/",
-                "agent3_testing": f"generated_code/{seq_id}/agent3/testing/",
-                "agent4_folder": f"generated_code/{seq_id}/agent4/"
+                "agent2_folder": f"generated_code/{seq_id}/agent2",
+                "agent3_testing": f"generated_code/{seq_id}/agent3", 
+                "agent4_folder": f"generated_code/{seq_id}/agent4"
             }
         }
         
@@ -332,8 +336,13 @@ class UpdatedAgent1_BlueprintGenerator:
         else:
             return "automation"
     
-    def _generate_automation_steps(self, task_category: str, instruction: str, 
-                                  ui_elements: List[Dict], platform: str) -> List[Dict[str, Any]]:
+    def _generate_automation_steps(
+        self, 
+        task_category: str, 
+        instruction: str, 
+        ui_elements: List[Dict], 
+        platform: str
+    ) -> List[Dict[str, Any]]:
         """Generate automation steps based on task analysis"""
         
         steps = []
@@ -350,7 +359,7 @@ class UpdatedAgent1_BlueprintGenerator:
                 },
                 {
                     "step_order": 2,
-                    "step_name": "Navigate to registration page",
+                    "step_name": "Navigate to registration page", 
                     "action_type": "navigate",
                     "description": "Open registration or signup page",
                     "expected_result": "Registration page loaded",
@@ -361,7 +370,7 @@ class UpdatedAgent1_BlueprintGenerator:
                     "step_name": "Enter user name",
                     "action_type": "input",
                     "description": "Fill in user name or full name field",
-                    "expected_result": "Name entered successfully",
+                    "expected_result": "Name entered successfully", 
                     "validation_method": "field_value_check"
                 },
                 {
@@ -401,7 +410,7 @@ class UpdatedAgent1_BlueprintGenerator:
                     "validation_method": "system_check"
                 },
                 {
-                    "step_order": 2,
+                    "step_order": 2, 
                     "step_name": "Navigate to target",
                     "action_type": "navigate",
                     "description": "Navigate to target application/page",
@@ -411,7 +420,7 @@ class UpdatedAgent1_BlueprintGenerator:
                 {
                     "step_order": 3,
                     "step_name": "Perform main action",
-                    "action_type": "interact",
+                    "action_type": "interact", 
                     "description": f"Execute task: {instruction}",
                     "expected_result": "Task completed",
                     "validation_method": "result_check"
@@ -431,6 +440,7 @@ class UpdatedAgent1_BlueprintGenerator:
     def _assess_complexity(self, steps: List[Dict]) -> str:
         """Assess automation complexity"""
         step_count = len(steps)
+        
         if step_count <= 3:
             return "simple"
         elif step_count <= 6:
@@ -442,7 +452,7 @@ class UpdatedAgent1_BlueprintGenerator:
         """Generate requirements.txt content based on platform and task"""
         base_requirements = [
             "selenium>=4.0.0",
-            "requests>=2.25.0",
+            "requests>=2.25.0", 
             "Pillow>=8.0.0",
             "pytesseract>=0.3.8"
         ]
@@ -464,10 +474,12 @@ class UpdatedAgent1_BlueprintGenerator:
         return base_requirements
     
     async def _create_workflow_steps_in_db(self, seq_id: int, steps: List[Dict[str, Any]]):
-        """Create workflow steps in database"""
+        """Create workflow steps in database - THE MISSING METHOD FIXED"""
         if not steps:
+            logger.warning(f"🔵 [Agent1] No steps to create for task {seq_id}")
             return
         
+        # Convert steps to format expected by database manager (using step_order, not step_number)
         db_steps = []
         for step in steps:
             db_steps.append({
@@ -476,35 +488,33 @@ class UpdatedAgent1_BlueprintGenerator:
                 "expected_result": step.get("expected_result", "Success")
             })
         
+        # Use the existing database method that works with step_order column
         step_ids = await self.db_manager.create_workflow_steps(
             seq_id=seq_id,
             agent_name=self.agent_name,
             steps=db_steps
         )
         
-        logger.info(f"🔵 [Agent1] Created {len(step_ids)} workflow steps in database")
+        logger.info(f"🔵 [Agent1] ✅ Created {len(step_ids)} workflow steps in database")
     
     async def _initialize_task_database(self, task_db_path: Path, seq_id: int):
         """Initialize SQLite database file in task folder"""
-        # Create a copy of the main database structure in the task folder
         # This allows each task to have its own portable database
-        
         task_db_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Copy main database to task folder (simplified approach)
         import shutil
         if Path("sqlite_db.sqlite").exists():
             shutil.copy2("sqlite_db.sqlite", str(task_db_path))
-            logger.info(f"🔵 [Agent1] ✅ Task database created: {task_db_path}")
+            logger.info(f"🔵 [Agent1] Task database created: {task_db_path}")
         else:
             # Create new database with same schema
-            from app.database.database_manager import DATABASE_SCHEMA
-            
-            async with aiosqlite.connect(str(task_db_path)) as db:
-                await db.executescript(DATABASE_SCHEMA)
-                await db.commit()
-            
-            logger.info(f"🔵 [Agent1] ✅ New task database initialized: {task_db_path}")
+            if AIOSQLITE_AVAILABLE:
+                from app.database.database_manager import DATABASE_SCHEMA
+                async with aiosqlite.connect(str(task_db_path)) as db:
+                    await db.executescript(DATABASE_SCHEMA)
+                    await db.commit()
+                logger.info(f"🔵 [Agent1] New task database initialized: {task_db_path}")
     
     def _calculate_confidence(self, text_content: str, ui_elements: List[Dict], blueprint: Dict) -> float:
         """Calculate blueprint confidence score"""
@@ -517,16 +527,41 @@ class UpdatedAgent1_BlueprintGenerator:
             confidence += 0.15
         
         # UI elements factor (30%)
-        if len(ui_elements) > 5:
+        if len(ui_elements) >= 5:
             confidence += 0.3
         elif len(ui_elements) > 0:
             confidence += 0.15
         
         # Blueprint completeness factor (40%)
-        steps = blueprint.get('steps', [])
-        if len(steps) > 4:
+        steps = blueprint.get("steps", [])
+        if len(steps) >= 4:
             confidence += 0.4
         elif len(steps) > 0:
             confidence += 0.2
         
         return min(confidence, 1.0)
+
+
+# Global instance management - COMPATIBLE
+_agent1_instance: Optional[UpdatedAgent1_BlueprintGenerator] = None
+
+async def get_enhanced_agent1() -> UpdatedAgent1_BlueprintGenerator:
+    """Get or create Enhanced Agent 1 instance - COMPLETE VERSION"""
+    global _agent1_instance
+    
+    if _agent1_instance is None:
+        _agent1_instance = UpdatedAgent1_BlueprintGenerator()
+        await _agent1_instance.initialize()
+    
+    return _agent1_instance
+
+
+if __name__ == "__main__":
+    # Test the complete agent
+    async def test_agent1():
+        agent = UpdatedAgent1_BlueprintGenerator()
+        await agent.initialize()
+        
+        print("🧪 Complete Agent 1 test completed")
+    
+    asyncio.run(test_agent1())

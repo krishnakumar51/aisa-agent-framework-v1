@@ -11,6 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, TypedDict, Annotated
 from typing_extensions import Literal
+from langgraph.checkpoint.sqlite import SqliteSaver
 
 # LangGraph imports for state management and workflow
 try:
@@ -22,22 +23,11 @@ except ImportError:
     LANGGRAPH_AVAILABLE = False
     print("⚠️  LangGraph not available. Install with: pip install langgraph")
 
-
-try:
-    from langgraph_checkpoint_sqlite import SqliteSaver
-except ImportError:
-    try:
-        from langgraph.checkpoint.sqlite import SqliteSaver
-    except ImportError:
-        print("⚠️ SqliteSaver not available")
-        SqliteSaver = None
-
-
 # Import database and agents
 from app.database.database_manager import get_testing_db
+from app.agents.enhanced_agent2 import EnhancedAgent2_CodeGenerator
+from app.agents.enhanced_agent3 import EnhancedAgent3_IsolatedTesting
 from app.agents.agent1_blueprint import UpdatedAgent1_BlueprintGenerator
-from app.agents.agent2_code import UpdatedAgent2_CodeGenerator
-from app.agents.agent3_testing import UpdatedAgent3_TestingEnvironment
 from app.agents.agent4_results import UpdatedAgent4_FinalReporter
 
 # Import existing automation tools
@@ -102,8 +92,8 @@ class LangGraphMultiAgentOrchestrator:
         
         # Initialize all agents
         self.agent1 = UpdatedAgent1_BlueprintGenerator()
-        self.agent2 = UpdatedAgent2_CodeGenerator() 
-        self.agent3 = UpdatedAgent3_TestingEnvironment()
+        self.agent2 = EnhancedAgent2_CodeGenerator() 
+        self.agent3 = EnhancedAgent3_IsolatedTesting()
         self.agent4 = UpdatedAgent4_FinalReporter()
         
         # Initialize automation tools
