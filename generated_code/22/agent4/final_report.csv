@@ -1,0 +1,17 @@
+=== TASK SUMMARY ===
+seq_id,instruction,platform,status,created_at
+22,Perform automation task,mobile,final_reporting,2025-09-22 04:24:01
+
+=== WORKFLOW STEPS ===
+step_id,step_name,action_type,status,test_attempt,execution_time
+101,Initialize automation,setup,timeout,0,0.0
+102,Navigate to target,navigate,timeout,0,0.0
+103,Perform main action,interact,timeout,0,0.0
+104,Validate completion,validate,timeout,0,0.0
+
+=== AGENT COMMUNICATIONS ===
+from_agent,to_agent,message_type,status,created_at
+
+=== TEST EXECUTIONS ===
+script_version,execution_attempt,success,execution_duration,created_at
+,1,1,,

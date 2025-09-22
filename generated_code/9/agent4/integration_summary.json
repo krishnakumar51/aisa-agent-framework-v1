@@ -1,0 +1,147 @@
+{
+  "task_id": 9,
+  "started_at": "2025-09-22T20:21:28.658291",
+  "steps_completed": [
+    "conversation_json",
+    "sqlite_export",
+    "workflow_summary",
+    "cleanup"
+  ],
+  "results": {
+    "conversation_json": {
+      "success": true,
+      "task_id": 9,
+      "conversation_json_path": "generated_code\\9\\agent4\\conversation.json",
+      "data_points": {
+        "messages": 6,
+        "agent_executions": 4,
+        "tool_executions": 1,
+        "collaboration_sessions": 0,
+        "output_files": 0
+      },
+      "generated_at": "2025-09-22T20:21:28.660310"
+    },
+    "sqlite_export": {
+      "success": true,
+      "task_id": 9,
+      "export_db_path": "generated_code\\9\\agent4\\task_9.sqlite",
+      "export_size_bytes": 20480,
+      "data_exported": {
+        "tasks": 1,
+        "agent_executions": 4,
+        "tool_executions": 2,
+        "collaboration_sessions": 0,
+        "output_files": 0,
+        "checkpoints": 0
+      },
+      "include_checkpoints": true,
+      "exported_at": "2025-09-22T20:21:28.699872"
+    },
+    "workflow_summary": {
+      "success": true,
+      "task_id": 9,
+      "workflow_summary_path": "generated_code\\9\\agent4\\workflow_summary.json",
+      "summary_data": {
+        "task_id": 9,
+        "summary_type": "workflow_execution",
+        "generated_at": "2025-09-22T20:21:28.700872",
+        "task_overview": {
+          "task_id": 9,
+          "instruction": "Sample instruction",
+          "platform": "web",
+          "status": "completed",
+          "created_at": "2025-09-22T20:21:28.700872"
+        },
+        "execution_timeline": [
+          {
+            "timestamp": "2025-09-22T20:21:28.700872",
+            "event": "workflow_started",
+            "agent": "system",
+            "description": "Workflow execution started"
+          },
+          {
+            "timestamp": "2025-09-22T20:21:28.700872",
+            "event": "agent_execution",
+            "agent": "agent1",
+            "description": "Blueprint generation completed"
+          }
+        ],
+        "agent_performance": {
+          "average_execution_time": 2.9,
+          "success_rate": 1.0,
+          "error_rate": 0.0,
+          "agent_efficiency": {
+            "agent1": {
+              "time": 2.5,
+              "success": true
+            },
+            "agent2": {
+              "time": 3.2,
+              "success": true
+            },
+            "agent3": {
+              "time": 4.1,
+              "success": true
+            },
+            "agent4": {
+              "time": 1.8,
+              "success": true
+            }
+          }
+        },
+        "tool_usage": {
+          "total_tools_executed": 8,
+          "successful_executions": 8,
+          "failed_executions": 0,
+          "average_execution_time": 2.8,
+          "most_used_tools": [
+            {
+              "tool": "document_analysis_tool",
+              "count": 1
+            },
+            {
+              "tool": "script_generation_tool",
+              "count": 1
+            }
+          ]
+        },
+        "collaboration_summary": {
+          "collaboration_sessions": 0,
+          "agent_interactions": 0,
+          "collaboration_success_rate": 0.0,
+          "most_collaborative_agents": []
+        },
+        "output_summary": {
+          "total_files_generated": 12,
+          "file_types": {
+            "python": 1,
+            "txt": 3,
+            "json": 2,
+            "html": 1,
+            "csv": 1,
+            "sqlite": 1
+          },
+          "total_size_bytes": 45678
+        },
+        "success_metrics": {
+          "overall_success_rate": 1.0,
+          "workflow_completion_rate": 1.0,
+          "average_execution_time": 11.6,
+          "error_free_execution": true,
+          "collaboration_efficiency": 1.0,
+          "output_generation_success": 1.0
+        }
+      },
+      "include_performance_metrics": true,
+      "generated_at": "2025-09-22T20:21:28.703386"
+    },
+    "cleanup": {
+      "success": true,
+      "temp_files_removed": 0,
+      "cache_files_removed": 0,
+      "cleaned_at": "2025-09-22T20:21:28.703386"
+    }
+  },
+  "overall_success": true,
+  "completed_at": "2025-09-22T20:21:28.703386"
+}

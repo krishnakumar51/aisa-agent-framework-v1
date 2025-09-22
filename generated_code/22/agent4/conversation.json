@@ -1,0 +1,13 @@
+{
+  "seq_id": 22,
+  "agent": "agent4",
+  "total_communications": 0,
+  "generated_at": "2025-09-22T04:28:08.580087",
+  "conversation_summary": {
+    "agent2_to_agent3": 0,
+    "agent3_to_agent2": 0,
+    "resolved_issues": 0,
+    "pending_issues": 0
+  },
+  "detailed_conversations": []
+}

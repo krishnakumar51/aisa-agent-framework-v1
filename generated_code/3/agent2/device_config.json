@@ -1,0 +1,24 @@
+{
+  "platform": "mobile",
+  "selected_device": {
+    "device_id": "ZD222GXYPV",
+    "device_name": "motorola motorola edge 40 neo",
+    "is_emulator": false,
+    "status": "available",
+    "platform_version": "15",
+    "api_level": "35",
+    "manufacturer": "motorola",
+    "model": "motorola edge 40 neo",
+    "capabilities": {
+      "platformName": "Android",
+      "deviceName": "ZD222GXYPV",
+      "udid": "ZD222GXYPV",
+      "automationName": "UiAutomator2",
+      "newCommandTimeout": 300,
+      "noReset": true,
+      "fullReset": false,
+      "autoGrantPermissions": true,
+      "systemPort": 8889
+    }
+  }
+}

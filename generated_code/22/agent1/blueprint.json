@@ -1,0 +1,64 @@
+{
+  "seq_id": 22,
+  "instruction": "Perform automation task",
+  "task_category": "form_filling",
+  "platform": "mobile",
+  "document_analysis": {
+    "text_length": 3434,
+    "ui_elements_found": 0,
+    "text_preview": "Step-by-Step\n \nProcess\n \n(Outlook\n \nMobile\n \nApp)\n \n \n1.\n \nInitial\n \nScreen\n \n–\n \nAdd\n \nEmail\n \nAccounts\n \n●\n \nScreen\n \ndisplays:\n \n“Agregar\n \ntus\n \ncuentas\n \nde\n \ncorreo”\n \n(Add\n \nyour\n \nemail\n \nacco..."
+  },
+  "ui_elements": [],
+  "steps": [
+    {
+      "step_order": 1,
+      "step_name": "Initialize automation",
+      "action_type": "setup",
+      "description": "Setup mobile automation environment",
+      "expected_result": "Environment ready",
+      "validation_method": "system_check"
+    },
+    {
+      "step_order": 2,
+      "step_name": "Navigate to target",
+      "action_type": "navigate",
+      "description": "Navigate to target application/page",
+      "expected_result": "Target loaded",
+      "validation_method": "page_check"
+    },
+    {
+      "step_order": 3,
+      "step_name": "Perform main action",
+      "action_type": "interact",
+      "description": "Execute task: Perform automation task",
+      "expected_result": "Task completed",
+      "validation_method": "result_check"
+    },
+    {
+      "step_order": 4,
+      "step_name": "Validate completion",
+      "action_type": "validate",
+      "description": "Verify task completion",
+      "expected_result": "Validation successful",
+      "validation_method": "ocr_validation"
+    }
+  ],
+  "estimated_duration": 60,
+  "complexity": "medium",
+  "requirements": [
+    "selenium>=4.0.0",
+    "requests>=2.25.0",
+    "Pillow>=8.0.0",
+    "pytesseract>=0.3.8",
+    "Appium-Python-Client>=2.0.0",
+    "opencv-python>=4.5.0",
+    "faker>=8.0.0"
+  ],
+  "generated_at": "2025-09-22T04:24:02.091033",
+  "agent": "agent1",
+  "folder_structure": {
+    "agent2_folder": "generated_code/22/agent2",
+    "agent3_testing": "generated_code/22/agent3",
+    "agent4_folder": "generated_code/22/agent4"
+  }
+}

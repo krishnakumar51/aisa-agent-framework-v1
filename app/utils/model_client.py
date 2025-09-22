@@ -55,9 +55,9 @@ class ModelClient:
             }
         }
         
-        self._setup_anthropic_client()
+        self.setup_anthropic_client()
     
-    def _setup_anthropic_client(self):
+    def setup_anthropic_client(self):
         """Setup Anthropic client with proper configuration"""
         if not ANTHROPIC_AVAILABLE:
             print("⚠️ Anthropic library not available. Install with: pip install anthropic>=0.7.8")
@@ -879,6 +879,26 @@ Even in fallback mode, this system strives to provide:
 **Status:** {model_name} fallback active - intelligent assistance continues
 """
         return response
+
+
+# Global instance for singleton pattern
+_model_client_instance: Optional[ModelClient] = None
+
+async def get_model_client() -> ModelClient:
+    """Get singleton model client instance"""
+    global _model_client_instance
+    if _model_client_instance is None:
+        _model_client_instance = ModelClient()
+        _model_client_instance.setup_anthropic_client()
+    return _model_client_instance
+
+def get_model_client_sync() -> ModelClient:
+    """Get model client synchronously"""
+    global _model_client_instance
+    if _model_client_instance is None:
+        _model_client_instance = ModelClient()
+        _model_client_instance.setup_anthropic_client()
+    return _model_client_instance
 
 # Global instance with Claude 4 Sonnet configuration
 model_client = ModelClient()

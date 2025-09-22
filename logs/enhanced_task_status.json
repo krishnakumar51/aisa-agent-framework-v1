@@ -1,6 +1,6 @@
 {
-  "temp_1758384456": {
-    "temp_task_id": "temp_1758384456",
+  "temp_1758514890": {
+    "temp_task_id": "temp_1758514890",
     "status": "failed",
     "workflow_type": "langgraph",
     "current_agent": "traditional_fallback_orchestrator_completed",
@@ -8,13 +8,13 @@
       "phase": "completed",
       "phase_progress": 100,
       "overall_progress": 100,
-      "current_step": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
-      "estimated_completion": "2025-09-20T16:16:06.503858+00:00"
+      "current_step": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
+      "estimated_completion": "2025-09-22T04:29:10.600583+00:00"
     },
     "task_info": {
-      "instruction": "Create an Outlook account with name Krishna Kumar and DOB 20 Sep 2000",
+      "instruction": "Perform automation task",
       "platform": "mobile",
-      "task_category": "account_creation",
+      "task_category": "form_filling",
       "files_processed": [
         {
           "filename": "agent.pdf",
@@ -27,7 +27,7 @@
       "screenshots_count": 0,
       "additional_data_keys": []
     },
-    "created_at": "2025-09-20T16:07:36.503858",
+    "created_at": "2025-09-22T04:21:30.600583",
     "orchestrator_features": {
       "state_management": true,
       "message_passing": true,
@@ -50,7 +50,7 @@
     "partial_results": {},
     "execution_log": [
       {
-        "timestamp": "2025-09-20T16:07:36.514871",
+        "timestamp": "2025-09-22T04:21:30.605062",
         "updates": {
           "status": "starting",
           "current_agent": "langgraph_orchestrator",
@@ -63,7 +63,7 @@
         }
       },
       {
-        "timestamp": "2025-09-20T16:07:38.522594",
+        "timestamp": "2025-09-22T04:21:32.603303",
         "updates": {
           "status": "fallback_orchestrator",
           "current_agent": "traditional_orchestrator",
@@ -73,7 +73,7 @@
         }
       },
       {
-        "timestamp": "2025-09-20T16:07:38.979589",
+        "timestamp": "2025-09-22T04:21:33.112609",
         "updates": {
           "status": "failed",
           "current_agent": "traditional_fallback_orchestrator_completed",
@@ -81,16 +81,16 @@
             "phase": "completed",
             "phase_progress": 100,
             "overall_progress": 100,
-            "current_step": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number"
+            "current_step": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'"
           },
           "final_result": {
             "success": false,
-            "sequential_task_id": null,
+            "sequential_task_id": 21,
             "base_path": "N/A",
-            "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
+            "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
             "confidence": 0.0,
             "performance_grade": "Unknown",
-            "execution_time": 2.4737136363983154,
+            "execution_time": 2.510028839111328,
             "workflow_type_used": "traditional_fallback",
             "folder_structure": {},
             "key_metrics": {},
@@ -102,22 +102,22 @@
             },
             "detailed_results": {
               "success": false,
-              "error": "Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
-              "seq_id": null,
-              "total_execution_time": 0.45699548721313477,
-              "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
+              "error": "Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
+              "seq_id": 21,
+              "total_execution_time": 0.5093064308166504,
+              "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
               "orchestrator_version": "2.0.0"
             }
           },
-          "completed_at": "2025-09-20T16:07:38.979589",
-          "total_execution_time": 2.4737136363983154,
+          "completed_at": "2025-09-22T04:21:33.112609",
+          "total_execution_time": 2.510028839111328,
           "workflow_summary": {},
           "langgraph_state": {},
           "agent_messages": [],
           "testing_environment": {
             "enabled": true,
             "ready": false,
-            "sequential_task_id": null,
+            "sequential_task_id": 21,
             "base_path": "N/A",
             "tools_status": {}
           }
@@ -126,12 +126,12 @@
     ],
     "final_result": {
       "success": false,
-      "sequential_task_id": null,
+      "sequential_task_id": 21,
       "base_path": "N/A",
-      "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
+      "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
       "confidence": 0.0,
       "performance_grade": "Unknown",
-      "execution_time": 2.4737136363983154,
+      "execution_time": 2.510028839111328,
       "workflow_type_used": "traditional_fallback",
       "folder_structure": {},
       "key_metrics": {},
@@ -143,22 +143,22 @@
       },
       "detailed_results": {
         "success": false,
-        "error": "Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
-        "seq_id": null,
-        "total_execution_time": 0.45699548721313477,
-        "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: Agent 1 failed: Blueprint generation failed: table workflow_steps has no column named step_number",
+        "error": "Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
+        "seq_id": 21,
+        "total_execution_time": 0.5093064308166504,
+        "message": "❌ Updated workflow failed: Updated multi-agent workflow failed: 'EnhancedAgent2_CodeGenerator' object has no attribute 'generate_code_and_setup'",
         "orchestrator_version": "2.0.0"
       }
     },
-    "completed_at": "2025-09-20T16:07:38.979589",
-    "total_execution_time": 2.4737136363983154,
+    "completed_at": "2025-09-22T04:21:33.112609",
+    "total_execution_time": 2.510028839111328,
     "workflow_summary": {},
     "langgraph_state": {},
     "agent_messages": [],
     "testing_environment": {
       "enabled": true,
       "ready": false,
-      "sequential_task_id": null,
+      "sequential_task_id": 21,
       "base_path": "N/A",
       "tools_status": {}
     }

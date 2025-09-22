@@ -1,13 +1,109 @@
 {
-  "seq_id": 9,
-  "agent": "agent4",
-  "total_communications": 0,
-  "generated_at": "2025-09-20T14:55:27.186733",
-  "conversation_summary": {
-    "agent2_to_agent3": 0,
-    "agent3_to_agent2": 0,
-    "resolved_issues": 0,
-    "pending_issues": 0
+  "conversation_id": "task_9",
+  "task_id": 9,
+  "generated_at": "2025-09-22T20:21:28.659296",
+  "metadata": {
+    "task_id": 9,
+    "instruction": "Sample instruction",
+    "platform": "web",
+    "status": "completed",
+    "created_at": "2025-09-22T20:21:28.659296"
   },
-  "detailed_conversations": []
+  "messages": [
+    {
+      "role": "user",
+      "content": "Execute automation workflow for task 9",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "task_request"
+    },
+    {
+      "role": "assistant",
+      "content": "Agent agent1 executed successfully",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "agent_execution",
+      "agent": "agent1",
+      "metadata": {
+        "status": "completed",
+        "execution_time": 2.5
+      }
+    },
+    {
+      "role": "assistant",
+      "content": "Agent agent2 executed successfully",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "agent_execution",
+      "agent": "agent2",
+      "metadata": {
+        "status": "completed",
+        "execution_time": 3.2
+      }
+    },
+    {
+      "role": "assistant",
+      "content": "Agent agent3 executed successfully",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "agent_execution",
+      "agent": "agent3",
+      "metadata": {
+        "status": "completed",
+        "execution_time": 4.1
+      }
+    },
+    {
+      "role": "assistant",
+      "content": "Agent agent4 executed successfully",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "agent_execution",
+      "agent": "agent4",
+      "metadata": {
+        "status": "completed",
+        "execution_time": 1.8
+      }
+    },
+    {
+      "role": "tool",
+      "content": "Tool document_analysis_tool executed",
+      "timestamp": "2025-09-22T20:21:28.659296",
+      "message_type": "tool_execution",
+      "metadata": {
+        "tool_name": "document_analysis_tool",
+        "agent_name": "agent1",
+        "execution_status": "success",
+        "execution_time": 2.5
+      }
+    }
+  ],
+  "agents": {
+    "agent1": {
+      "status": "completed",
+      "execution_time": 2.5
+    },
+    "agent2": {
+      "status": "completed",
+      "execution_time": 3.2
+    },
+    "agent3": {
+      "status": "completed",
+      "execution_time": 4.1
+    },
+    "agent4": {
+      "status": "completed",
+      "execution_time": 1.8
+    }
+  },
+  "tools": [
+    {
+      "tool_name": "document_analysis_tool",
+      "agent_name": "agent1",
+      "execution_status": "success",
+      "execution_time": 2.5
+    }
+  ],
+  "workflow": {
+    "workflow_id": "workflow_9",
+    "status": "completed",
+    "steps": 4
+  },
+  "collaboration": [],
+  "files": []
 }

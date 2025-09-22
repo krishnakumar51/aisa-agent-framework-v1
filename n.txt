@@ -16,3 +16,12 @@ set TESSERACT_PATH="C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
 Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force
+
+
+
+curl -X POST http://localhost:8000/workflow/execute \
+  -F "instruction=Automate Outlook email creation" \
+  -F "platform=mobile" \
+  -F "use_langgraph=true" \
+  -F 'additional_data={"account_name":"Krishna Kumar","date_of_birth":"1998-09-25"}' \
+  -F "document=@agent.pdf"

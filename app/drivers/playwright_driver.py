@@ -1,391 +1,538 @@
 """
-Playwright web automation driver with stealth mode optimization
+Web Automation Driver
+Production Playwright driver for web automation with robust error handling
 """
+
 import asyncio
 import json
-from typing import Dict, Any, Optional, List
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
-from app.config.settings import settings
+import logging
+from typing import Dict, Any, List, Optional, Union
+from datetime import datetime
+from pathlib import Path
 
-class PlaywrightDriver:
-    """Playwright web automation driver with stealth capabilities"""
+# Playwright imports with fallback
+try:
+    from playwright.async_api import async_playwright, Browser, Page, BrowserContext, ElementHandle
+    PLAYWRIGHT_AVAILABLE = True
+    print("✅ Playwright available for web automation")
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+    print("⚠️ Playwright not available")
+    # Create fallback classes
+    class Browser: pass
+    class Page: pass
+    class BrowserContext: pass
+    class ElementHandle: pass
+
+logger = logging.getLogger(__name__)
+
+class WebAutomationDriver:
+    """
+    Production web automation driver using Playwright.
+    Handles browser management, page interactions, and error recovery.
+    """
     
     def __init__(self):
-        """Initialize Playwright driver"""
         self.playwright = None
-        self.browser: Optional[Browser] = None
-        self.context: Optional[BrowserContext] = None
-        self.page: Optional[Page] = None
-        self.screenshots: List[bytes] = []
-        self.execution_logs: List[str] = []
+        self.browser = None
+        self.context = None
+        self.page = None
+        self.driver_available = PLAYWRIGHT_AVAILABLE
+        self.default_timeout = 30000
+        self.retry_attempts = 3
+        self.setup_completed = False
+        logger.info(f"🌐 Web Automation Driver initialized - Available: {self.driver_available}")
     
-    async def setup(self, headless: bool = None, stealth_mode: bool = True) -> bool:
-        """Setup Playwright browser with optional stealth mode"""
+    async def initialize_browser(
+        self,
+        browser_type: str = "chromium",
+        headless: bool = False,
+        viewport: Dict[str, int] = None
+    ) -> Dict[str, Any]:
+        """Initialize browser with specified configuration"""
+        
+        if not self.driver_available:
+            return {
+                "success": False,
+                "error": "Playwright not available"
+            }
+        
         try:
-            if headless is None:
-                headless = settings.PLAYWRIGHT_HEADLESS
-            
             self.playwright = await async_playwright().start()
             
-            # Enhanced browser args for stealth (based on outlook.py patterns)
-            browser_args = ['--no-sandbox', '--disable-setuid-sandbox']
-            
-            if stealth_mode:
-                browser_args.extend([
-                    '--no-first-run',
-                    '--no-service-autorun', 
-                    '--no-default-browser-check',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-features=VizDisplayCompositor',
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-extensions',
-                    '--disable-plugins',
-                    '--disable-default-apps',
-                    '--disable-background-timer-throttling',
-                    '--disable-backgrounding-occluded-windows',
-                    '--disable-renderer-backgrounding',
-                    '--disable-features=TranslateUI',
-                    '--disable-ipc-flooding-protection',
-                    '--disable-hang-monitor',
-                    '--disable-prompt-on-repost',
-                    '--disable-sync',
-                    '--disable-translate',
-                    '--metrics-recording-only',
-                    '--no-report-upload',
-                    '--safebrowsing-disable-auto-update',
-                    '--enable-automation=false',
-                    '--disable-client-side-phishing-detection'
-                ])
+            # Browser selection
+            if browser_type == "firefox":
+                browser_launcher = self.playwright.firefox
+            elif browser_type == "webkit":
+                browser_launcher = self.playwright.webkit
+            else:
+                browser_launcher = self.playwright.chromium
             
             # Launch browser
-            self.browser = await self.playwright.chromium.launch(
+            self.browser = await browser_launcher.launch(
                 headless=headless,
-                args=browser_args
+                args=['--no-sandbox', '--disable-setuid-sandbox'] if not headless else []
             )
             
-            # Create context with stealth settings
-            context_options = {
-                'viewport': {'width': 1366, 'height': 768},
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-            
-            if stealth_mode:
-                context_options.update({
-                    'locale': 'en-US',
-                    'timezone_id': 'America/New_York',
-                    'permissions': ['geolocation', 'notifications'],
-                    'extra_http_headers': {
-                        'Accept-Language': 'en-US,en;q=0.9',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                        'Upgrade-Insecure-Requests': '1',
-                        'Sec-Fetch-Site': 'none',
-                        'Sec-Fetch-Mode': 'navigate',
-                        'Sec-Fetch-User': '?1',
-                        'Sec-Fetch-Dest': 'document'
-                    }
-                })
+            # Create context
+            context_options = {}
+            if viewport:
+                context_options["viewport"] = viewport
+            else:
+                context_options["viewport"] = {"width": 1280, "height": 800}
             
             self.context = await self.browser.new_context(**context_options)
             
             # Create page
             self.page = await self.context.new_page()
             
-            # Increase timeout
-            self.page.set_default_timeout(60000)
+            # Set default timeout
+            self.page.set_default_timeout(self.default_timeout)
             
-            # Apply stealth script if enabled
-            if stealth_mode:
-                await self.page.add_init_script("""
-                    // Remove webdriver property
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined,
-                        set: () => {},
-                        configurable: true,
-                        enumerable: false
-                    });
-
-                    // Override chrome property with realistic values
-                    window.chrome = {
-                        runtime: { onConnect: undefined, onMessage: undefined },
-                        loadTimes: function() {
-                            return {
-                                requestTime: Date.now() / 1000 - Math.random() * 1000,
-                                startLoadTime: Date.now() / 1000 - Math.random() * 1000,
-                                commitLoadTime: Date.now() / 1000 - Math.random() * 1000,
-                                finishDocumentLoadTime: Date.now() / 1000 - Math.random() * 1000,
-                                finishLoadTime: Date.now() / 1000 - Math.random() * 1000,
-                                firstPaintTime: Date.now() / 1000 - Math.random() * 1000,
-                                firstPaintAfterLoadTime: 0,
-                                navigationType: 'Other',
-                                wasFetchedViaSpdy: false,
-                                wasNpnNegotiated: false,
-                                npnNegotiatedProtocol: 'unknown',
-                                wasAlternateProtocolAvailable: false,
-                                connectionInfo: 'unknown'
-                            };
-                        }
-                    };
-
-                    // Mock plugins
-                    Object.defineProperty(navigator, 'plugins', {
-                        get: () => [
-                            { 0: { type: "application/x-google-chrome-pdf", suffixes: "pdf", description: "Portable Document Format", __proto__: MimeType.prototype }, description: "Portable Document Format", filename: "internal-pdf-viewer", length: 1, name: "Chrome PDF Plugin" },
-                            { 0: { type: "application/pdf", suffixes: "pdf", description: "", __proto__: MimeType.prototype }, description: "", filename: "mhjfbmdgcfjbbpaeojofohoefgiehjai", length: 1, name: "Chrome PDF Viewer" }
-                        ],
-                        configurable: true,
-                        enumerable: false
-                    });
-
-                    // Mock languages
-                    Object.defineProperty(navigator, 'languages', {
-                        get: () => ['en-US', 'en'],
-                        configurable: true,
-                        enumerable: false
-                    });
-
-                    // Override permissions query
-                    const originalQuery = window.navigator.permissions.query;
-                    window.navigator.permissions.query = (parameters) => (
-                        parameters.name === 'notifications' ?
-                            Promise.resolve({ state: Notification.permission }) :
-                            originalQuery(parameters)
-                    );
-
-                    // Add connection info
-                    Object.defineProperty(navigator, 'connection', {
-                        get: () => ({ effectiveType: '4g', rtt: 50, downlink: 10, saveData: false }),
-                        configurable: true,
-                        enumerable: false
-                    });
-
-                    // Mock hardware
-                    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 4, configurable: true, enumerable: false });
-                    Object.defineProperty(navigator, 'deviceMemory', { get: () => 8, configurable: true, enumerable: false });
-
-                    // Remove automation traces
-                    delete navigator.__proto__.webdriver;
-                """)
+            self.setup_completed = True
             
-            # Setup page event handlers
-            self.page.on("dialog", self._handle_dialog)
-            self.page.on("pageerror", self._handle_page_error)
-            
-            self._log("Playwright browser setup completed" + (" with stealth mode" if stealth_mode else ""))
-            return True
-        
-        except Exception as e:
-            self._log(f"Browser setup failed: {str(e)}")
-            return False
-    
-    async def execute_script(self, script: str) -> Dict[str, Any]:
-        """Execute automation script"""
-        try:
-            if not self.page:
-                raise Exception("Browser not initialized")
-            
-            self._log("Starting script execution")
-            
-            # Parse script commands
-            commands = self._parse_script(script)
-            results = []
-            
-            for i, command in enumerate(commands):
-                try:
-                    result = await self._execute_command(command)
-                    results.append({
-                        "step": i + 1,
-                        "command": command,
-                        "success": True,
-                        "result": result
-                    })
-                    
-                    # Take screenshot after each step
-                    screenshot = await self._take_screenshot()
-                    self.screenshots.append(screenshot)
-                    
-                    # Add small delay between actions
-                    await asyncio.sleep(0.5)
-                    
-                except Exception as e:
-                    self._log(f"Command failed: {str(e)}")
-                    results.append({
-                        "step": i + 1,
-                        "command": command,
-                        "success": False,
-                        "error": str(e)
-                    })
-                    break
-            
-            return {
-                "success": all(r["success"] for r in results),
-                "results": results,
-                "screenshots": self.screenshots,
-                "logs": self.execution_logs
+            result = {
+                "success": True,
+                "browser_type": browser_type,
+                "headless": headless,
+                "viewport": context_options.get("viewport"),
+                "initialized_at": datetime.now().isoformat()
             }
-        
+            
+            logger.info(f"✅ Browser initialized: {browser_type} ({'headless' if headless else 'headed'})")
+            return result
+            
         except Exception as e:
-            self._log(f"Script execution failed: {str(e)}")
+            logger.error(f"❌ Browser initialization failed: {str(e)}")
             return {
                 "success": False,
-                "error": str(e),
-                "logs": self.execution_logs
+                "error": str(e)
             }
     
-    def _parse_script(self, script: str) -> List[Dict[str, Any]]:
-        """Parse automation script into commands"""
-        commands = []
-        lines = script.strip().split('\n')
+    async def navigate_to_url(self, url: str, wait_until: str = "domcontentloaded") -> Dict[str, Any]:
+        """Navigate to specified URL"""
         
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith('#'):
-                continue
-            
-            # Parse different command types
-            if line.startswith('navigate'):
-                url = line.split('navigate')[1].strip().strip('"\'')
-                commands.append({"action": "navigate", "url": url})
-            
-            elif line.startswith('click'):
-                selector = line.split('click')[1].strip().strip('"\'')
-                commands.append({"action": "click", "selector": selector})
-            
-            elif line.startswith('fill'):
-                parts = line.split('fill')[1].strip().split(' ', 1)
-                selector = parts[0].strip('"\'')
-                value = parts[1].strip('"\'') if len(parts) > 1 else ""
-                commands.append({"action": "fill", "selector": selector, "value": value})
-            
-            elif line.startswith('wait'):
-                timeout = int(line.split('wait')[1].strip()) if line.split('wait')[1].strip().isdigit() else 3000
-                commands.append({"action": "wait", "timeout": timeout})
-            
-            elif line.startswith('screenshot'):
-                commands.append({"action": "screenshot"})
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
         
-        return commands
-    
-    async def _execute_command(self, command: Dict[str, Any]) -> Any:
-        """Execute individual command with enhanced element finding"""
-        action = command["action"]
-        
-        if action == "navigate":
-            await self.page.goto(command["url"], wait_until="domcontentloaded")
-            self._log(f"Navigated to: {command['url']}")
-            return {"url": self.page.url}
-        
-        elif action == "click":
-            element = await self._find_element_robust(command["selector"])
-            if element:
-                await element.scroll_into_view_if_needed()
-                await asyncio.sleep(0.5)  # Wait after scroll
-                await element.click()
-                self._log(f"Clicked: {command['selector']}")
-                return {"clicked": True}
-            else:
-                raise Exception(f"Element not found: {command['selector']}")
-        
-        elif action == "fill":
-            element = await self._find_element_robust(command["selector"])
-            if element:
-                await element.scroll_into_view_if_needed()
-                await element.click()
-                await asyncio.sleep(0.3)
-                await element.fill("")
-                await asyncio.sleep(0.2)
-                await element.type(command["value"], delay=50)  # Type with delay
-                self._log(f"Filled {command['selector']} with: {command['value']}")
-                return {"filled": True}
-            else:
-                raise Exception(f"Element not found: {command['selector']}")
-        
-        elif action == "wait":
-            await self.page.wait_for_timeout(command["timeout"])
-            self._log(f"Waited: {command['timeout']}ms")
-            return {"waited": command["timeout"]}
-        
-        elif action == "screenshot":
-            screenshot = await self._take_screenshot()
-            self._log("Screenshot taken")
-            return {"screenshot": True}
-        
-        else:
-            raise Exception(f"Unknown action: {action}")
-    
-    async def _find_element_robust(self, selector: str):
-        """Find element with multiple strategies (based on outlook.py patterns)"""
-        strategies = [
-            selector,  # Original selector
-            f"[aria-label*='{selector}' i]",  # Aria label contains
-            f"[placeholder*='{selector}' i]",  # Placeholder contains
-            f":text('{selector}')",  # Text content
-            f"button:has-text('{selector}')",  # Button with text
-            f"input[name*='{selector}' i]",  # Input name contains
-        ]
-        
-        for strategy in strategies:
-            try:
-                element = await self.page.wait_for_selector(strategy, timeout=5000, state="visible")
-                if element:
-                    return element
-            except:
-                continue
-        
-        return None
-    
-    async def _take_screenshot(self) -> bytes:
-        """Take page screenshot"""
-        if self.page:
-            return await self.page.screenshot(type="png", full_page=True)
-        return b""
-    
-    async def _handle_dialog(self, dialog):
-        """Handle browser dialogs"""
-        self._log(f"Dialog appeared: {dialog.message}")
-        await dialog.accept()
-    
-    async def _handle_page_error(self, error):
-        """Handle page errors"""
-        self._log(f"Page error: {str(error)}")
-    
-    def _log(self, message: str):
-        """Add log message"""
-        self.execution_logs.append(message)
-        print(f"[Playwright] {message}")
-    
-    async def cleanup(self):
-        """Cleanup browser resources"""
         try:
-            if self.page:
-                await self.page.close()
-            if self.context:
-                await self.context.close()
-            if self.browser:
-                await self.browser.close()
-            if self.playwright:
-                await self.playwright.stop()
+            response = await self.page.goto(url, wait_until=wait_until)
             
-            self._log("Browser cleanup completed")
+            result = {
+                "success": True,
+                "url": url,
+                "status_code": response.status if response else None,
+                "wait_until": wait_until,
+                "navigated_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Navigated to: {url}")
+            return result
+            
         except Exception as e:
-            self._log(f"Cleanup error: {str(e)}")
+            logger.error(f"❌ Navigation failed to {url}: {str(e)}")
+            return {
+                "success": False,
+                "url": url,
+                "error": str(e)
+            }
+    
+    async def wait_for_element(self, selector: str, timeout: int = None) -> Dict[str, Any]:
+        """Wait for element to be visible"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            element = await self.page.wait_for_selector(
+                selector,
+                timeout=timeout or self.default_timeout
+            )
+            
+            if element:
+                # Get element information
+                is_visible = await element.is_visible()
+                is_enabled = await element.is_enabled()
+                
+                result = {
+                    "success": True,
+                    "selector": selector,
+                    "element_found": True,
+                    "is_visible": is_visible,
+                    "is_enabled": is_enabled,
+                    "waited_at": datetime.now().isoformat()
+                }
+                
+                logger.info(f"✅ Element found: {selector}")
+                return result
+            else:
+                return {
+                    "success": False,
+                    "selector": selector,
+                    "error": "Element not found within timeout"
+                }
+                
+        except Exception as e:
+            logger.error(f"❌ Wait for element failed {selector}: {str(e)}")
+            return {
+                "success": False,
+                "selector": selector,
+                "error": str(e)
+            }
+    
+    async def click_element(self, selector: str, wait_first: bool = True) -> Dict[str, Any]:
+        """Click on element"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            # Wait for element if requested
+            if wait_first:
+                wait_result = await self.wait_for_element(selector)
+                if not wait_result["success"]:
+                    return wait_result
+            
+            # Click element
+            await self.page.click(selector)
+            
+            result = {
+                "success": True,
+                "action": "click",
+                "selector": selector,
+                "clicked_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Clicked element: {selector}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Click failed on {selector}: {str(e)}")
+            return {
+                "success": False,
+                "action": "click",
+                "selector": selector,
+                "error": str(e)
+            }
+    
+    async def fill_input(self, selector: str, value: str, clear_first: bool = True) -> Dict[str, Any]:
+        """Fill input field with value"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            # Wait for element
+            wait_result = await self.wait_for_element(selector)
+            if not wait_result["success"]:
+                return wait_result
+            
+            # Clear field if requested
+            if clear_first:
+                await self.page.fill(selector, "")
+            
+            # Fill with value
+            await self.page.fill(selector, value)
+            
+            result = {
+                "success": True,
+                "action": "fill",
+                "selector": selector,
+                "value_length": len(value),
+                "filled_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Filled input: {selector}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Fill input failed on {selector}: {str(e)}")
+            return {
+                "success": False,
+                "action": "fill",
+                "selector": selector,
+                "error": str(e)
+            }
+    
+    async def get_element_text(self, selector: str) -> Dict[str, Any]:
+        """Get text content of element"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            # Wait for element
+            wait_result = await self.wait_for_element(selector)
+            if not wait_result["success"]:
+                return wait_result
+            
+            # Get text
+            text = await self.page.text_content(selector)
+            
+            result = {
+                "success": True,
+                "action": "get_text",
+                "selector": selector,
+                "text": text or "",
+                "text_length": len(text) if text else 0,
+                "retrieved_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Retrieved text from: {selector}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Get text failed on {selector}: {str(e)}")
+            return {
+                "success": False,
+                "action": "get_text",
+                "selector": selector,
+                "error": str(e)
+            }
+    
+    async def wait_for_page_load(self, state: str = "networkidle") -> Dict[str, Any]:
+        """Wait for page to reach specified load state"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            await self.page.wait_for_load_state(state)
+            
+            result = {
+                "success": True,
+                "action": "wait_for_load_state",
+                "state": state,
+                "completed_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Page load state reached: {state}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Wait for page load failed: {str(e)}")
+            return {
+                "success": False,
+                "action": "wait_for_load_state",
+                "state": state,
+                "error": str(e)
+            }
+    
+    async def take_screenshot(self, filepath: str = None, full_page: bool = False) -> Dict[str, Any]:
+        """Take screenshot of current page"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            if not filepath:
+                filepath = f"screenshot_{int(datetime.now().timestamp())}.png"
+            
+            screenshot_bytes = await self.page.screenshot(
+                path=filepath,
+                full_page=full_page
+            )
+            
+            result = {
+                "success": True,
+                "action": "screenshot",
+                "filepath": filepath,
+                "full_page": full_page,
+                "size_bytes": len(screenshot_bytes),
+                "taken_at": datetime.now().isoformat()
+            }
+            
+            logger.info(f"✅ Screenshot saved: {filepath}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Screenshot failed: {str(e)}")
+            return {
+                "success": False,
+                "action": "screenshot",
+                "error": str(e)
+            }
+    
+    async def execute_javascript(self, script: str) -> Dict[str, Any]:
+        """Execute JavaScript on the page"""
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
+        
+        try:
+            result_data = await self.page.evaluate(script)
+            
+            result = {
+                "success": True,
+                "action": "javascript",
+                "script": script[:100] + "..." if len(script) > 100 else script,
+                "result": result_data,
+                "executed_at": datetime.now().isoformat()
+            }
+            
+            logger.info("✅ JavaScript executed successfully")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ JavaScript execution failed: {str(e)}")
+            return {
+                "success": False,
+                "action": "javascript",
+                "script": script[:100] + "..." if len(script) > 100 else script,
+                "error": str(e)
+            }
     
     async def get_page_info(self) -> Dict[str, Any]:
         """Get current page information"""
-        if not self.page:
-            return {}
+        
+        if not self.setup_completed:
+            return {
+                "success": False,
+                "error": "Browser not initialized"
+            }
         
         try:
-            return {
-                "url": self.page.url,
-                "title": await self.page.title(),
-                "screenshot": await self._take_screenshot()
+            url = self.page.url
+            title = await self.page.title()
+            
+            result = {
+                "success": True,
+                "url": url,
+                "title": title,
+                "retrieved_at": datetime.now().isoformat()
             }
+            
+            logger.info(f"✅ Page info retrieved: {title}")
+            return result
+            
         except Exception as e:
-            self._log(f"Error getting page info: {str(e)}")
-            return {}
+            logger.error(f"❌ Get page info failed: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    async def close_browser(self) -> Dict[str, Any]:
+        """Close browser and cleanup"""
+        
+        try:
+            if self.page:
+                await self.page.close()
+                self.page = None
+            
+            if self.context:
+                await self.context.close()
+                self.context = None
+            
+            if self.browser:
+                await self.browser.close()
+                self.browser = None
+            
+            if self.playwright:
+                await self.playwright.stop()
+                self.playwright = None
+            
+            self.setup_completed = False
+            
+            result = {
+                "success": True,
+                "action": "close_browser",
+                "closed_at": datetime.now().isoformat()
+            }
+            
+            logger.info("✅ Browser closed successfully")
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ Browser close failed: {str(e)}")
+            return {
+                "success": False,
+                "action": "close_browser",
+                "error": str(e)
+            }
+    
+    def get_capabilities(self) -> Dict[str, Any]:
+        """Get driver capabilities"""
+        return {
+            "driver_available": self.driver_available,
+            "setup_completed": self.setup_completed,
+            "supported_browsers": ["chromium", "firefox", "webkit"] if self.driver_available else [],
+            "supported_actions": [
+                "navigate", "click", "fill", "get_text", "wait_for_element",
+                "screenshot", "javascript", "page_info"
+            ] if self.driver_available else [],
+            "default_timeout": self.default_timeout,
+            "retry_attempts": self.retry_attempts
+        }
 
-# Global Playwright driver instance  
-playwright_driver = PlaywrightDriver()
+# Global web driver instance
+_web_driver = None
+
+async def get_web_driver() -> WebAutomationDriver:
+    """Get global web driver instance"""
+    global _web_driver
+    if _web_driver is None:
+        _web_driver = WebAutomationDriver()
+    return _web_driver
+
+if __name__ == "__main__":
+    # Test web automation driver
+    async def test_web_driver():
+        print("🧪 Testing Web Automation Driver...")
+        
+        driver = WebAutomationDriver()
+        
+        # Test capabilities
+        capabilities = driver.get_capabilities()
+        print(f"✅ Driver capabilities: {capabilities['driver_available']}")
+        
+        if capabilities["driver_available"]:
+            # Test browser initialization
+            init_result = await driver.initialize_browser("chromium", True)
+            print(f"✅ Browser initialization: {init_result['success']}")
+            
+            if init_result["success"]:
+                # Test navigation
+                nav_result = await driver.navigate_to_url("https://example.com")
+                print(f"✅ Navigation: {nav_result['success']}")
+                
+                # Test page info
+                info_result = await driver.get_page_info()
+                print(f"✅ Page info: {info_result.get('title', 'No title')}")
+                
+                # Test screenshot
+                screenshot_result = await driver.take_screenshot("test_screenshot.png")
+                print(f"✅ Screenshot: {screenshot_result['success']}")
+                
+                # Close browser
+                close_result = await driver.close_browser()
+                print(f"✅ Browser close: {close_result['success']}")
+        
+        print("🎉 Web Automation Driver test completed!")
+    
+    import asyncio
+    asyncio.run(test_web_driver())
